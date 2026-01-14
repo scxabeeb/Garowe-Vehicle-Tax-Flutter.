@@ -2,8 +2,16 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  static const String baseUrl = 'http://localhost:5000/api';
+  // Switch this to false when you want to use localhost again
+  static const bool isProduction = true;
 
+  static const String _prodUrl =
+      'https://garowe-vehicle-tax-system-production.up.railway.app/api';
+  static const String _devUrl = 'http://localhost:5000/api';
+
+  static const String baseUrl = isProduction ? _prodUrl : _devUrl;
+
+  // LOGIN
   static Future<Map<String, dynamic>> login(
       String username, String password) async {
     final response = await http.post(
@@ -27,6 +35,7 @@ class ApiService {
     );
   }
 
+  // GET VEHICLE BY PLATE
   static Future<Map<String, dynamic>?> getVehicle(String plate) async {
     final response = await http.get(
       Uri.parse('$baseUrl/vehicles/by-plate/$plate'),
@@ -40,6 +49,7 @@ class ApiService {
     return null;
   }
 
+  // GET TAX AMOUNT
   static Future<double> getTaxAmount(int carTypeId, String movement) async {
     final response = await http.get(
       Uri.parse(
@@ -55,7 +65,10 @@ class ApiService {
     return 0.0;
   }
 
-  // FIXED: never throw here, always return success/null or error JSON
+  // PAY
+  // returns:
+  //   null -> success
+  //   Map  -> backend error
   static Future<dynamic> pay(Map<String, dynamic> data) async {
     final response = await http.post(
       Uri.parse('$baseUrl/payments'),
